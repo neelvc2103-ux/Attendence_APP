@@ -1,0 +1,7 @@
+{
+  "name": "Attendly AI",
+  "description": "A smart, offline-ready self-attendance tracker with timetable management, multi-day leave planning, and AI-powered attendance insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
