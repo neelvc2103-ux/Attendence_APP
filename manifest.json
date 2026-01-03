@@ -1,20 +1,18 @@
-
 {
-  "name": "Attendly AI",
+  "name": "Attendly",
   "short_name": "Attendly",
-  "description": "Smart self-attendance tracker with AI insights.",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#4f46e5",
-  "theme_color": "#4f46e5",
+  "background_color": "#6b5cff",
+  "theme_color": "#6b5cff",
   "icons": [
     {
-      "src": "https://picsum.photos/192/192?random=1",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://picsum.photos/512/512?random=2",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
