@@ -1,11 +1,10 @@
 {
   "name": "Attendly",
   "short_name": "Attendly",
-  "description": "Smart attendance & academic planner",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#6366f1",
-  "theme_color": "#6366f1",
+  "background_color": "#7c6be6",
+  "theme_color": "#7c6be6",
   "icons": [
     {
       "src": "/icon-192.png",
