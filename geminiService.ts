@@ -8,21 +8,25 @@ import {
 } from "./types";
 
 /* ---------------------------------------------
-   AI CLIENT (OPTIONAL)
+   ENV (VITE SAFE)
 --------------------------------------------- */
-const ai = new GoogleGenAI({
-  apiKey: process.env.API_KEY
-});
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 
 /* ---------------------------------------------
-   LOCAL RULE-BASED INSIGHTS (SOURCE OF TRUTH)
+   AI CLIENT (OPTIONAL)
+--------------------------------------------- */
+const ai = API_KEY
+  ? new GoogleGenAI({ apiKey: API_KEY })
+  : null;
+
+/* ---------------------------------------------
+   LOCAL RULE-BASED INSIGHTS (FALLBACK)
 --------------------------------------------- */
 const generateLocalInsights = (
   attendance: AttendanceRecord[],
   target: number,
   statuses: Record<string, { weight: number }>
 ): Insight[] => {
-
   if (attendance.length === 0) {
     return [{
       type: "HEALTH",
@@ -46,7 +50,7 @@ const generateLocalInsights = (
     return [{
       type: "HEALTH",
       title: "No Valid Records",
-      message: "Attendance records exist but no valid statuses were found."
+      message: "Attendance exists but no valid statuses were found."
     }];
   }
 
@@ -56,7 +60,7 @@ const generateLocalInsights = (
     return [{
       type: "WARNING",
       title: "Attendance Below Target",
-      message: `Your attendance is ${percentage}%, below the target of ${target}%. Attend upcoming classes to stay safe.`
+      message: `Your attendance is ${percentage}%, below the target of ${target}%.`
     }];
   }
 
@@ -78,6 +82,12 @@ export const generateHolisticInsights = async (
   target: number,
   statuses: Record<string, { weight: number }>
 ): Promise<Insight[]> => {
+
+  // If AI key missing → fallback immediately
+  if (!ai) {
+    console.warn("Gemini API key missing. Using local insights.");
+    return generateLocalInsights(attendance, target, statuses);
+  }
 
   const prompt = `
 Analyze the student's attendance and academic data and return insights.
@@ -123,14 +133,8 @@ Return ONLY valid JSON.
     return JSON.parse(response.text);
 
   } catch (error) {
-    console.warn("AI unavailable, using local insights.", error);
-
-    // ✅ SINGLE SOURCE OF TRUTH FALLBACK
-    return generateLocalInsights(
-      attendance,
-      target,
-      statuses
-    );
+    console.warn("Gemini unavailable, using local insights.", error);
+    return generateLocalInsights(attendance, target, statuses);
   }
 };
 
@@ -138,6 +142,8 @@ Return ONLY valid JSON.
    OCR TIMETABLE PARSER
 --------------------------------------------- */
 export const parseTimetableFromOCR = async (ocrText: string) => {
+  if (!ai) return null;
+
   const prompt = `
 Extract weekly timetable data from OCR text and return JSON.
 
@@ -149,9 +155,7 @@ ${ocrText}
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json"
-      }
+      config: { responseMimeType: "application/json" }
     });
 
     return JSON.parse(response.text);
